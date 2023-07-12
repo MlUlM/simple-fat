@@ -28,8 +28,18 @@ impl<'buff> CommonBootSectorReadable for CommonBootSectorBuffer<'buff> {
     }
 
 
-    fn bytes_per_sec(&self) -> u16 {
+    fn bytes_per_sector(&self) -> u16 {
         buff_read_u16(self.buff, 11)
+    }
+
+
+    fn sectors_per_cluster(&self) -> u8 {
+        self.buff[13]
+    }
+
+
+    fn reserved_sectors(&self) -> u16 {
+        buff_read_u16(self.buff, 14)
     }
 
 
@@ -39,7 +49,12 @@ impl<'buff> CommonBootSectorReadable for CommonBootSectorBuffer<'buff> {
 
 
     fn total_sector32(&self) -> u32 {
-        buff_read_u32(self.buff, 32)
+        buff_read_u32(self.buff, 36)
+    }
+
+
+    fn num_fats(&self) -> u8 {
+        self.buff[16]
     }
 }
 
@@ -59,6 +74,22 @@ mod tests {
 
 
     #[test]
+    fn it_sectors_per_cluster() {
+        let buff = read_fat32_buffer();
+        let common = CommonBootSectorBuffer::new(buff.as_slice());
+        assert_eq!(common.sectors_per_cluster(), 2);
+    }
+
+
+    #[test]
+    fn it_reserved_sectors() {
+        let buff = read_fat32_buffer();
+        let common = CommonBootSectorBuffer::new(buff.as_slice());
+        assert_eq!(common.reserved_sectors(), 0x20);
+    }
+
+
+    #[test]
     fn it_total_sectors16_is_zero_if_fat32() {
         let buff = read_fat32_buffer();
         let common = CommonBootSectorBuffer::new(buff.as_slice());
@@ -70,10 +101,24 @@ mod tests {
     fn it_total_sectors32_is_non_zero_if_fat32() {
         let buff = read_fat32_buffer();
         let common = CommonBootSectorBuffer::new(buff.as_slice());
+
+        println!("total sectors 32 bits = {}", common.total_sector32());
         assert_ne!(common.total_sector32(), 0);
     }
 
 
+    #[test]
+    fn it_num_fats() {
+        let buff = read_fat32_buffer();
+        let common = CommonBootSectorBuffer::new(buff.as_slice());
+        assert_eq!(common.num_fats(), 2);
+    }
 
 
+    #[test]
+    fn it_data_region_offset_fat32() {
+        let buff = read_fat32_buffer();
+        let common = CommonBootSectorBuffer::new(buff.as_slice());
+        assert_eq!(common.data_region_offset_fat32(), 0x102000);
+    }
 }

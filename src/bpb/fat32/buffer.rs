@@ -17,7 +17,7 @@ impl<'buff> Fat32BootSectorBuffer<'buff> {
 
 
 impl<'buff> Fat32BootSectorReadable for Fat32BootSectorBuffer<'buff> {
-    fn root_clusters(&self) -> u32 {
+    fn root_cluster_no(&self) -> u32 {
         buff_read_u32(self.buff, 44)
     }
 }
@@ -33,6 +33,6 @@ mod tests {
     fn it_root_clusters() {
         let buff = read_fat32_buffer();
         let fat32 = Fat32BootSectorBuffer::new(buff.as_slice());
-        assert_eq!(fat32.root_clusters(), 2);
+        assert_eq!(fat32.root_cluster_no(), 2);
     }
 }

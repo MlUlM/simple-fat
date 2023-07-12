@@ -4,16 +4,14 @@
 extern crate alloc;
 
 
-mod bpb;
+pub mod bpb;
+pub mod dir;
+pub mod error;
 
 
 #[cfg(test)]
 pub(crate) fn read_fat32_buffer() -> alloc::vec::Vec<u8> {
-    std::fs::read("./fat_disk_32")
-        .unwrap()
-        .into_iter()
-        .take(1024 * 16)
-        .collect()
+    std::fs::read("./fat_disk_32").unwrap()
 }
 
 
