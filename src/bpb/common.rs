@@ -1,29 +1,26 @@
-pub trait CommonReadable{
-    /// Jump instruction to boot code.
-    fn jmp_boot(&self) -> [u8; 3];
+use alloc::ffi::CString;
+use alloc::vec::Vec;
+
+pub mod buffer;
+
+pub trait CommonBootSectorReadable {
+    fn oem_name_buff(&self) -> Vec<u8>;
 
 
-    fn oem_name(&self) -> &str;
+    fn bytes_per_sec(&self) -> u16;
 
 
-}
+    fn total_sector16(&self) -> u16;
 
 
-
-/// This structure indicates fields up to offset36 in `Bbp` or Boot sector
-pub(crate) struct Common{
-
-}
+    fn total_sector32(&self) -> u32;
 
 
-
-impl CommonReadable for Common{
-    fn jmp_boot(&self) -> [u8; 3] {
-        todo!()
-    }
-
-    fn oem_name(&self) -> &str {
-        todo!()
+    fn oem_name(&self) -> CString {
+        unsafe { CString::from_vec_unchecked(self.oem_name_buff()) }
     }
 }
+
+
+
 
