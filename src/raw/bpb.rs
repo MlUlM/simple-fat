@@ -1,8 +1,9 @@
 use crate::error::FatResult;
 use crate::FatDeviceAccessible;
 use crate::raw::bpb::fat32::{Fat32BootSector, Fat32BootSectorReadable};
-use crate::raw::bpb::general::buffer::CommonBootSector;
-use crate::raw::bpb::general::CommonBootSectorReadable;
+use crate::raw::bpb::general::buffer::GeneralBootSector;
+use crate::raw::bpb::general::GeneralBootSectorReadable;
+use crate::raw::dir::short::ShortDirEntry;
 
 mod general;
 mod fat32;
@@ -50,9 +51,11 @@ pub struct Bpb {
 //     }
 // }
 //
-//
+
+
+#[derive(Clone)]
 pub struct BpbFat32<D> {
-    general: CommonBootSector<D>,
+    general: GeneralBootSector<D>,
     fat32: Fat32BootSector<D>,
     device: D,
 }
@@ -63,14 +66,20 @@ impl<D> BpbFat32<D>
 {
     pub fn new(device: D) -> BpbFat32<D> {
         Self {
-            general: CommonBootSector::new(device.clone()),
+            general: GeneralBootSector::new(device.clone()),
             fat32: Fat32BootSector::new(device.clone()),
             device,
         }
     }
 
 
-    pub fn data_region_offset_fat32(&self) -> FatResult<usize> {
+    #[inline]
+    pub fn root_dir(&self) -> FatResult<ShortDirEntry<D>> {
+        Ok(ShortDirEntry::new(self.device.clone(), self.clone(), self.data_region_offset_fat32()?))
+    }
+
+
+    pub(crate) fn data_region_offset_fat32(&self) -> FatResult<usize> {
         let bytes_per_sector = self.general.bytes_per_sector()? as usize;
         let reserve_bytes = self.general.reserved_sectors()? as usize * bytes_per_sector;
         let fat_bytes = self.general.num_fats()? as usize * self.fat32.sectors_per_fat()? as usize * bytes_per_sector;

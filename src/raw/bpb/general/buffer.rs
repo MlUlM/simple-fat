@@ -1,15 +1,17 @@
 use crate::error::FatResult;
 use crate::FatDeviceAccessible;
-use crate::raw::bpb::general::CommonBootSectorReadable;
+use crate::raw::bpb::general::GeneralBootSectorReadable;
 
-pub struct CommonBootSector<D> {
+
+#[derive(Clone)]
+pub struct GeneralBootSector<D> {
     device: D,
 }
 
 
-impl<D> CommonBootSector<D> where D: FatDeviceAccessible + Clone {
+impl<D> GeneralBootSector<D> where D: FatDeviceAccessible + Clone {
     #[inline]
-    pub const fn new(device: D) -> CommonBootSector<D> {
+    pub const fn new(device: D) -> GeneralBootSector<D> {
         Self {
             device
         }
@@ -17,7 +19,7 @@ impl<D> CommonBootSector<D> where D: FatDeviceAccessible + Clone {
 }
 
 
-impl<D> CommonBootSectorReadable for CommonBootSector<D>
+impl<D> GeneralBootSectorReadable for GeneralBootSector<D>
     where D: FatDeviceAccessible + Clone
 {
     #[inline]
@@ -68,49 +70,49 @@ impl<D> CommonBootSectorReadable for CommonBootSector<D>
 
 #[cfg(test)]
 mod tests {
-    use crate::raw::bpb::general::buffer::CommonBootSector;
-    use crate::raw::bpb::general::CommonBootSectorReadable;
+    use crate::raw::bpb::general::buffer::GeneralBootSector;
+    use crate::raw::bpb::general::GeneralBootSectorReadable;
     use crate::test::file_device;
 
     #[cfg(feature = "alloc")]
     #[test]
     fn it_oem_name() {
-        let general = CommonBootSector::new(file_device());
+        let general = GeneralBootSector::new(file_device());
         assert_eq!(general.oem_name().unwrap().to_str().unwrap(), "mkfs.fat");
     }
 
 
     #[test]
     fn it_sectors_per_cluster() {
-        let general = CommonBootSector::new(file_device());
+        let general = GeneralBootSector::new(file_device());
         assert_eq!(general.sectors_per_cluster().unwrap(), 2);
     }
 
 
     #[test]
     fn it_reserved_sectors() {
-        let general = CommonBootSector::new(file_device());
+        let general = GeneralBootSector::new(file_device());
         assert_eq!(general.reserved_sectors().unwrap(), 0x20);
     }
 
 
     #[test]
     fn it_total_sectors16_is_zero_if_fat32() {
-        let general = CommonBootSector::new(file_device());
+        let general = GeneralBootSector::new(file_device());
         assert_eq!(general.total_sector16().unwrap(), 0x00);
     }
 
 
     #[test]
     fn it_total_sectors32_is_non_zero_if_fat32() {
-        let general = CommonBootSector::new(file_device());
+        let general = GeneralBootSector::new(file_device());
         assert_eq!(general.total_sector32().unwrap(), 4 << 16);
     }
 
 
     #[test]
     fn it_num_fats() {
-        let general = CommonBootSector::new(file_device());
+        let general = GeneralBootSector::new(file_device());
         assert_eq!(general.num_fats().unwrap(), 2);
     }
 }

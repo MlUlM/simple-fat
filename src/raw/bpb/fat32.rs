@@ -9,6 +9,7 @@ pub trait Fat32BootSectorReadable {
 }
 
 
+#[derive(Clone)]
 pub struct Fat32BootSector<D> {
     device: D,
 }

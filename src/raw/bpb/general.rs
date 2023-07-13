@@ -7,7 +7,7 @@ use crate::error::{FatError, FatResult};
 
 pub mod buffer;
 
-pub trait CommonBootSectorReadable {
+pub trait GeneralBootSectorReadable {
     fn oem_name_buff(&self) -> FatResult<[u8; 8]>;
 
 
@@ -27,6 +27,7 @@ pub trait CommonBootSectorReadable {
 
 
     fn num_fats(&self) -> FatResult<u8>;
+
 
     #[cfg(feature = "alloc")]
     fn oem_name(&self) -> FatResult<CString> {

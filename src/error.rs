@@ -1,6 +1,9 @@
+use num_enum::TryFromPrimitiveError;
 use thiserror_no_std::Error;
 
-#[derive(Debug)]
+use crate::raw::dir::Attribute;
+
+#[derive(Debug, PartialEq)]
 pub enum FatDeviceError {
     StatusCode(isize)
 }
@@ -9,7 +12,7 @@ pub enum FatDeviceError {
 pub type FatResult<T = ()> = Result<T, FatError>;
 
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, PartialEq)]
 pub enum FatError {
     #[error("'sectors per clusters' must be one value of 1,2,4,8,16,32,64 or 128, but was {0}")]
     InvalidSecPerClus(u8),
@@ -19,6 +22,9 @@ pub enum FatError {
 
     #[error("{0:?}")]
     FailedDeviceAccess(FatDeviceError),
+
+    #[error("Failed dir entry type")]
+    InvalidDirEntryType,
 }
 
 
@@ -28,3 +34,9 @@ impl From<FatDeviceError> for FatError {
     }
 }
 
+
+impl From<TryFromPrimitiveError<Attribute>> for FatError {
+    fn from(value: TryFromPrimitiveError<Attribute>) -> Self {
+        Self::InvalidAttribute(value.number)
+    }
+}

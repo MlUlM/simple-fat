@@ -1,10 +1,39 @@
 use num_enum::TryFromPrimitive;
 
+use crate::error::{FatError, FatResult};
+use crate::FatDeviceAccessible;
+use crate::raw::dir::short::ShortDirEntry;
+
 pub mod long;
 pub mod short;
 
 
-#[derive(Debug, Copy, Clone, TryFromPrimitive, Eq, PartialEq)]
+#[derive(Debug)]
+pub enum Entry<D> where D: FatDeviceAccessible + Clone {
+    RegularFile,
+    Dir(ShortDirEntry<D>),
+}
+
+
+impl<D> Entry<D> where D: FatDeviceAccessible + Clone {
+    pub fn into_dir(self) -> FatResult<ShortDirEntry<D>> {
+        if let Self::Dir(dir) = self {
+            Ok(dir)
+        } else {
+            Err(FatError::InvalidDirEntryType)
+        }
+    }
+
+
+
+    #[inline]
+    pub fn is_regular_file(&self) -> bool{
+        matches!(self, Self::RegularFile)
+    }
+}
+
+
+#[derive(Debug, Copy, Clone, TryFromPrimitive, Eq, PartialEq, )]
 #[repr(u8)]
 pub enum Attribute {
     Readonly = 0x01,

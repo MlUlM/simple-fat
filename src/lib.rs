@@ -105,6 +105,8 @@ pub mod test {
 
 #[cfg(test)]
 mod tests {
+    use crate::test::open_fat32_file;
+
     //
     // #[test]
     // fn it_exists_hello_txt() {
@@ -112,7 +114,7 @@ mod tests {
     //     let hello_txt = fat.open("/hello.txt");
     //     assert!(hello_txt.is_ok());
     // }
-    //
+
     //
     // #[test]
     // fn it_read_hello_txt_buffer() {
