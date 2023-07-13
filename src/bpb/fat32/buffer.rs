@@ -17,6 +17,11 @@ impl<'buff> Fat32BootSectorBuffer<'buff> {
 
 
 impl<'buff> Fat32BootSectorReadable for Fat32BootSectorBuffer<'buff> {
+    fn sectors_per_fat(&self) -> u32 {
+        buff_read_u32(self.buff, 36)
+    }
+
+
     fn root_cluster_no(&self) -> u32 {
         buff_read_u32(self.buff, 44)
     }

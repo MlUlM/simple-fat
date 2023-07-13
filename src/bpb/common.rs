@@ -38,15 +38,6 @@ pub trait CommonBootSectorReadable {
             invalid => Err(FatError::InvalidSecPerClus(invalid))
         }
     }
-
-
-    fn data_region_offset_fat32(&self) -> usize {
-        let bytes_per_sector = self.bytes_per_sector() as usize;
-        let reserve_bytes = self.reserved_sectors() as usize * bytes_per_sector;
-        let fat_bytes = self.num_fats() as usize * self.total_sector32() as usize * bytes_per_sector;
-
-        reserve_bytes + fat_bytes
-    }
 }
 
 

@@ -49,7 +49,7 @@ impl<'buff> CommonBootSectorReadable for CommonBootSectorBuffer<'buff> {
 
 
     fn total_sector32(&self) -> u32 {
-        buff_read_u32(self.buff, 36)
+        buff_read_u32(self.buff, 32)
     }
 
 
@@ -91,8 +91,8 @@ mod tests {
 
     #[test]
     fn it_total_sectors16_is_zero_if_fat32() {
-        let buff = read_fat32_buffer();
-        let common = CommonBootSectorBuffer::new(buff.as_slice());
+        let buff = read_fat32_buffer().into_boxed_slice();
+        let common = CommonBootSectorBuffer::new(&buff);
         assert_eq!(common.total_sector16(), 0);
     }
 
@@ -102,8 +102,7 @@ mod tests {
         let buff = read_fat32_buffer();
         let common = CommonBootSectorBuffer::new(buff.as_slice());
 
-        println!("total sectors 32 bits = {}", common.total_sector32());
-        assert_ne!(common.total_sector32(), 0);
+        assert_eq!(common.total_sector32(), 4 << 16);
     }
 
 
@@ -112,13 +111,5 @@ mod tests {
         let buff = read_fat32_buffer();
         let common = CommonBootSectorBuffer::new(buff.as_slice());
         assert_eq!(common.num_fats(), 2);
-    }
-
-
-    #[test]
-    fn it_data_region_offset_fat32() {
-        let buff = read_fat32_buffer();
-        let common = CommonBootSectorBuffer::new(buff.as_slice());
-        assert_eq!(common.data_region_offset_fat32(), 0x102000);
     }
 }

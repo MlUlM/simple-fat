@@ -25,7 +25,7 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let buff: Vec<u8> = fs::read("./fat_disk")
+        let buff: Vec<u8> = fs::read("./fat_disk_32")
             .unwrap()
             .into_iter()
             .take(1024 * 16)

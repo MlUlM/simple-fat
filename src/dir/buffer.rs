@@ -93,9 +93,9 @@ mod tests {
     #[test]
     fn it_dir_fist_cluster_no() {
         let buff = read_fat32_buffer();
-        let dir = DirEntryBuffer::new(buff[0x102020..].to_vec().into_boxed_slice());
+        let dir = DirEntryBuffer::new(buff[0x102060..].to_vec().into_boxed_slice());
 
-        println!("{:X}", dir.first_cluster_no());
+        println!("{:?}", dir.attribute());
         assert_eq!(dir.first_cluster_no(), 0x74 << 16);
         assert_eq!(dir.first_cluster_no(), 0x102400);
     }
