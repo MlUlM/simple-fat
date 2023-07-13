@@ -1,6 +1,13 @@
 use thiserror_no_std::Error;
 
+#[derive(Debug)]
+pub enum FatDeviceError {
+    StatusCode(isize)
+}
+
+
 pub type FatResult<T = ()> = Result<T, FatError>;
+
 
 #[derive(Error, Debug)]
 pub enum FatError {
@@ -8,8 +15,16 @@ pub enum FatError {
     InvalidSecPerClus(u8),
 
     #[error("invalid 'DIR_Attr' = {0}")]
-    InvalidAttribute(u8)
+    InvalidAttribute(u8),
+
+    #[error("{0:?}")]
+    FailedDeviceAccess(FatDeviceError),
 }
 
 
+impl From<FatDeviceError> for FatError {
+    fn from(e: FatDeviceError) -> Self {
+        Self::FailedDeviceAccess(e)
+    }
+}
 

@@ -8,3 +8,14 @@ edition = "2021"
 auto-delegate = "0.0.7"
 thiserror-no-std = "2.0.2"
 num_enum = "0.6.1"
+spin = "0.9.8"
+
+
+[dev-dependencies]
+trybuild2 = "1.0.2"
+
+
+
+[features]
+default = ["alloc"]
+alloc = []
