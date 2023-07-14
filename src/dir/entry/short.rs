@@ -1,4 +1,3 @@
-#[cfg(feature = "alloc")]
 use alloc::ffi::CString;
 use alloc::vec::Vec;
 use core::fmt::{Debug, Formatter};
@@ -38,7 +37,7 @@ pub trait ShortDirEntryReadable {
             .copied()
             .collect::<Vec<u8>>();
 
-        while prefix.last().is_some_and(|b| *b == 0x20) {
+        while prefix.last().map(|b| *b == 0x20).unwrap_or(false) {
             prefix.pop();
         }
 
@@ -48,7 +47,7 @@ pub trait ShortDirEntryReadable {
             .take_while(|b| **b != 0x20)
             .peekable();
 
-        if suffix.peek().is_some_and(|b| **b != 0x20) {
+        if suffix.peek().map(|b| **b != 0x20).unwrap_or(false) {
             prefix.push(0x2E);
             prefix.extend(suffix);
         }
@@ -76,13 +75,17 @@ pub trait ShortDirEntryReadable {
 
 
 #[derive(Clone, Delegate)]
-pub struct ShortDirEntry<D> where D: FatDeviceAccessible {
-    #[to(DirEntryReadable)]
+pub struct ShortDirEntry<D>
+    where D: FatDeviceAccessible + BpbReadable
+{
+    #[to(DirEntryReadable, BpbReadable, FatDeviceAccessible)]
     pub(crate) base: BaseDirEntry<D>,
 }
 
 
-impl<D> ShortDirEntry<D> where D: FatDeviceAccessible + Clone + BpbReadable {
+impl<D> ShortDirEntry<D>
+    where D: FatDeviceAccessible + Clone + BpbReadable
+{
     #[inline]
     pub const fn new(base: BaseDirEntry<D>) -> Self {
         Self {
@@ -179,17 +182,10 @@ mod tests {
 
     #[test]
     fn it_hello_txt_file_name() {
-        let mut root = BpbFat32::new(file_device())
+        let file_name = BpbFat32::new(file_device())
             .root_dir()
-            .unwrap();
-
-        root.next();
-        root.next();
-
-        let file_name = root
-            .next()
             .unwrap()
-            .into_regular_file()
+            .find("HELLO.TXT")
             .unwrap()
             .name()
             .unwrap();

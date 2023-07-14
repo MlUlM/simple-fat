@@ -1,7 +1,7 @@
 use auto_delegate::Delegate;
 use num_enum::TryFromPrimitive;
-use crate::bpb::BpbReadable;
 
+use crate::bpb::BpbReadable;
 use crate::dir::entry::base::DirEntryReadable;
 use crate::dir::entry::short::ShortDirEntry;
 use crate::error::{FatError, FatResult};
@@ -35,12 +35,16 @@ pub enum EntryStatus {
 
 #[derive(Delegate)]
 #[to(DirEntryReadable)]
-pub enum DirEntry<D> where D: FatDeviceAccessible + Clone + BpbReadable {
+pub enum DirEntry<D>
+    where D: FatDeviceAccessible + Clone + BpbReadable
+{
     Short(ShortDirEntry<D>),
 }
 
 
-impl<D> DirEntry<D> where D: FatDeviceAccessible + DirEntryReadable{
+impl<D> DirEntry<D>
+    where D: FatDeviceAccessible + Clone + BpbReadable
+{
     #[inline]
     pub const fn short(short: ShortDirEntry<D>) -> DirEntry<D> {
         Self::Short(short)

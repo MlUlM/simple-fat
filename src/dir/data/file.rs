@@ -9,7 +9,9 @@ use crate::error::{FatError, FatResult};
 use crate::FatDeviceAccessible;
 
 #[derive(Delegate)]
-pub struct RegularFile<D> {
+pub struct RegularFile<D>
+    where D: FatDeviceAccessible + Clone + BpbReadable
+{
     #[to(ShortDirEntryReadable, DirEntryReadable)]
     pub entry: ShortDirEntry<D>,
 }
@@ -34,7 +36,6 @@ impl<D> RegularFile<D>
         }
 
         self.entry.base.bpb.read(buff, offset, self.entry.file_size()? as usize)?;
-
         Ok(())
     }
 
@@ -65,6 +66,6 @@ mod tests {
             .into_regular_file()
             .unwrap();
 
-        assert_eq!(&file.read_boxed().unwrap(), &[0x79, 0x65, 0x73])
+        assert_eq!(&file.read_boxed().unwrap(), &[0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x0A]);
     }
 }

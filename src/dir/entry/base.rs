@@ -1,7 +1,7 @@
 use alloc::format;
 use core::fmt::{Debug, Formatter};
 
-use auto_delegate::delegate;
+use auto_delegate::{delegate, Delegate};
 use num_enum::TryFromPrimitive;
 
 use crate::bpb::BpbReadable;
@@ -36,9 +36,13 @@ pub trait DirEntryReadable {
 }
 
 
-#[derive(Clone, )]
-pub struct BaseDirEntry<D> {
+#[derive(Clone, Delegate)]
+pub struct BaseDirEntry<D>
+    where D: FatDeviceAccessible + BpbReadable
+{
+    #[to(FatDeviceAccessible, BpbReadable)]
     pub(crate) bpb: D,
+
     pub(crate) offset: usize,
 }
 
@@ -66,7 +70,7 @@ impl<D> BaseDirEntry<D>
 
 
 impl<D> DirEntryReadable for BaseDirEntry<D>
-    where D: FatDeviceAccessible
+    where D: FatDeviceAccessible + BpbReadable
 {
     #[inline]
     fn status_raw(&self) -> FatResult<u8> {
@@ -81,7 +85,9 @@ impl<D> DirEntryReadable for BaseDirEntry<D>
 }
 
 
-impl<D> Debug for BaseDirEntry<D> where D: FatDeviceAccessible {
+impl<D> Debug for BaseDirEntry<D>
+    where D: FatDeviceAccessible + BpbReadable
+{
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         f
             .debug_struct("BaseDirEntry")

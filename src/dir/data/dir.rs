@@ -11,19 +11,27 @@ use crate::dir::entry::short::ShortDirEntry;
 use crate::FatDeviceAccessible;
 
 #[derive(Delegate)]
-pub struct DirEntries<D> {
-    #[to(ShortDirEntryReadable)]
+pub struct DirEntries<D>
+    where D: FatDeviceAccessible + Clone + BpbReadable
+{
+    #[to(DirEntryReadable, ShortDirEntryReadable, BpbReadable, FatDeviceAccessible)]
     entry: ShortDirEntry<D>,
-    pub(crate) base_offset: usize,
+
+    base_offset: usize,
+
+    offset: usize
 }
 
 
-impl<D> DirEntries<D> where D: FatDeviceAccessible + Clone + BpbReadable {
+impl<D> DirEntries<D>
+    where D: FatDeviceAccessible + Clone + BpbReadable
+{
     pub fn root(bpb: D, base_offset: usize) -> DirEntries<D> {
         let entry = ShortDirEntry::new(BaseDirEntry::new(bpb, base_offset));
         Self {
             entry,
             base_offset,
+            offset: base_offset
         }
     }
 
@@ -31,19 +39,20 @@ impl<D> DirEntries<D> where D: FatDeviceAccessible + Clone + BpbReadable {
         Self {
             entry,
             base_offset,
+            offset: base_offset
         }
     }
 
 
     #[inline]
-    pub fn into_data_entries(self) -> DataEntries<D>{
+    pub fn into_data_entries(self) -> DataEntries<D> {
         DataEntries::new(self)
     }
 
 
     #[inline]
     fn offset(&self, offset: usize) -> usize {
-        self.base_offset + offset
+        self.offset + offset
     }
 
 
@@ -56,11 +65,25 @@ impl<D> DirEntries<D> where D: FatDeviceAccessible + Clone + BpbReadable {
                 _ => self.find_next(offset + 0x20)
             }
         } else {
-            self.base_offset = offset + 0x20;
+            self.offset = offset + 0x20;
             Some(entry)
         }
     }
 }
+
+
+impl<D> Clone for DirEntries<D>
+ where D: FatDeviceAccessible + Clone + BpbReadable
+{
+    fn clone(&self) -> Self {
+        Self{
+            entry: self.entry.clone(),
+            base_offset: self.base_offset,
+            offset: 0,
+        }
+    }
+}
+
 
 
 impl<D> Iterator for DirEntries<D>
@@ -74,7 +97,8 @@ impl<D> Iterator for DirEntries<D>
 }
 
 
-impl<D> Debug for DirEntries<D> where D: FatDeviceAccessible {
+
+impl<D> Debug for DirEntries<D> where D: FatDeviceAccessible + Clone + BpbReadable {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         f
             .debug_struct("DirEntries")

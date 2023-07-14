@@ -1,38 +1,31 @@
+use auto_delegate::{delegate, Delegate};
+
 use crate::bpb::fat32::{Fat32BootSector, Fat32BootSectorReadable};
 use crate::bpb::general::buffer::GeneralBootSector;
 use crate::bpb::general::GeneralBootSectorReadable;
 use crate::dir::data::DataEntries;
 use crate::dir::data::dir::DirEntries;
-use crate::error::{FatDeviceError, FatResult};
+use crate::error::FatResult;
 use crate::FatDeviceAccessible;
 
 mod general;
 mod fat32;
 
-
+#[delegate]
 pub trait BpbReadable {
     fn data_cluster_offset_at(&self, cluster_no: usize) -> FatResult<usize>;
 }
 
 
-#[derive(Clone, )]
-pub struct BpbFat32<D> {
+#[derive(Clone, Delegate)]
+pub struct BpbFat32<D>
+    where D: FatDeviceAccessible
+{
     general: GeneralBootSector<D>,
     fat32: Fat32BootSector<D>,
 
+    #[to(FatDeviceAccessible)]
     pub(crate) device: D,
-}
-
-
-impl<D> FatDeviceAccessible for BpbFat32<D> where D: FatDeviceAccessible {
-    fn read(&self, buff: &mut [u8], offset: usize, bytes: usize) -> Result<(), FatDeviceError> {
-        self.device.read(buff, offset, bytes)
-    }
-
-
-    fn write(&mut self, buff: &[u8], offset: usize) -> Result<(), FatDeviceError> {
-        self.device.write(buff, offset)
-    }
 }
 
 
@@ -65,7 +58,9 @@ impl<D> BpbFat32<D>
 }
 
 
-impl<D> BpbReadable for BpbFat32<D> where D: FatDeviceAccessible + Clone {
+impl<D> BpbReadable for BpbFat32<D>
+    where D: FatDeviceAccessible + Clone
+{
     #[inline]
     fn data_cluster_offset_at(&self, cluster_no: usize) -> FatResult<usize> {
         let offset = (cluster_no - 2) * self.general.bytes_per_sector()? as usize * self.general.sectors_per_cluster()? as usize;

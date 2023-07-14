@@ -1,3 +1,4 @@
+use alloc::string::String;
 use num_enum::TryFromPrimitiveError;
 use thiserror_no_std::Error;
 
@@ -28,6 +29,10 @@ pub enum FatError {
 
     #[error("Expected buffer size is {0} but was {1}")]
     BufferToSmall(usize, usize),
+
+
+    #[error("Not found file {0}")]
+    NotfoundFile(String)
 }
 
 

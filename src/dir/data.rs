@@ -8,9 +8,12 @@ use crate::FatDeviceAccessible;
 pub mod dir;
 pub mod file;
 
-pub struct DataEntries<D> {
+pub struct DataEntries<D>
+    where D: FatDeviceAccessible + Clone + BpbReadable
+{
     dir_entries: DirEntries<D>,
 }
+
 
 impl<D> DataEntries<D>
     where D: FatDeviceAccessible + Clone + BpbReadable
@@ -26,7 +29,9 @@ impl<D> DataEntries<D>
         let data = self.next()?;
         let name = data.name().ok();
         if name
-            .is_some_and(|name| name.to_str().is_ok_and(|name| name == file_name)) {
+            .map(|name| name.to_str().map(|name| name == file_name).unwrap_or(false))
+            .unwrap_or(false)
+        {
             return Some(data);
         }
 
@@ -60,7 +65,9 @@ impl<D> Iterator for DataEntries<D>
 }
 
 
-pub enum Data<D> {
+pub enum Data<D>
+    where D: FatDeviceAccessible + BpbReadable + Clone
+{
     RegularFile(RegularFile<D>),
     Dir(DirEntries<D>),
 }
