@@ -3,45 +3,12 @@
 
 extern crate alloc;
 
-
-use crate::error::{FatDeviceError, FatResult};
-use crate::raw::bpb::{buff_read_u16, buff_read_u32};
+pub use device::FatDeviceAccessible;
 
 pub mod error;
-
-pub mod raw;
-
-
-pub trait FatDeviceAccessible {
-    fn read(&self, buff: &mut [u8], offset: usize, bytes: usize) -> Result<(), FatDeviceError>;
-
-
-    fn write(&mut self, buff: &[u8], offset: usize) -> Result<(), FatDeviceError>;
-
-
-    fn read_u8(&self, offset: usize) -> FatResult<u8> {
-        let mut buff = [0; 1];
-        self.read(&mut buff, offset, 1)?;
-
-        Ok(buff[0])
-    }
-
-    fn read_u16(&self, offset: usize) -> FatResult<u16> {
-        let mut buff = [0; 2];
-        self.read(&mut buff, offset, 2)?;
-
-        Ok(buff_read_u16(&buff, 0))
-    }
-
-
-    fn read_u32(&self, offset: usize) -> FatResult<u32> {
-        let mut buff = [0; 4];
-        self.read(&mut buff, offset, 4)?;
-
-        Ok(buff_read_u32(&buff, 0))
-    }
-}
-
+mod device;
+pub mod bpb;
+pub mod dir;
 
 pub struct Fat<D> {
     device: D,
@@ -75,6 +42,7 @@ pub mod test {
             Ok(())
         }
 
+
         fn write(&mut self, buff: &[u8], offset: usize) -> Result<(), FatDeviceError> {
             let mut src = std::fs::read("./fat_disk_32").unwrap();
             src[offset..(offset + buff.len())].copy_from_slice(buff);
@@ -84,7 +52,9 @@ pub mod test {
         }
     }
 
+
     #[inline]
+    #[allow(unused)]
     pub(crate) fn open_fat32_file() -> Fat<FileDevice> {
         Fat::new(FileDevice)
     }
@@ -97,6 +67,7 @@ pub mod test {
 
 
     #[inline]
+    #[allow(unused)]
     pub(crate) fn read_fat32_buffer() -> Box<[u8]> {
         std::fs::read("./fat_disk_32").unwrap().into_boxed_slice()
     }
@@ -105,7 +76,6 @@ pub mod test {
 
 #[cfg(test)]
 mod tests {
-    use crate::test::open_fat32_file;
 
     //
     // #[test]

@@ -5,7 +5,7 @@ edition = "2021"
 
 
 [dependencies]
-auto-delegate = "0.0.7"
+auto-delegate = { git = "https://github.com/elm-register/auto-delegate", branch = "nightly" }
 thiserror-no-std = "2.0.2"
 num_enum = "0.6.1"
 spin = "0.9.8"

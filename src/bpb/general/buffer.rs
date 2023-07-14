@@ -1,7 +1,6 @@
+use crate::bpb::general::GeneralBootSectorReadable;
 use crate::error::FatResult;
 use crate::FatDeviceAccessible;
-use crate::raw::bpb::general::GeneralBootSectorReadable;
-
 
 #[derive(Clone)]
 pub struct GeneralBootSector<D> {
@@ -70,8 +69,8 @@ impl<D> GeneralBootSectorReadable for GeneralBootSector<D>
 
 #[cfg(test)]
 mod tests {
-    use crate::raw::bpb::general::buffer::GeneralBootSector;
-    use crate::raw::bpb::general::GeneralBootSectorReadable;
+    use crate::bpb::general::buffer::GeneralBootSector;
+    use crate::bpb::general::GeneralBootSectorReadable;
     use crate::test::file_device;
 
     #[cfg(feature = "alloc")]

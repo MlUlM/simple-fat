@@ -1,7 +1,7 @@
 use num_enum::TryFromPrimitiveError;
 use thiserror_no_std::Error;
 
-use crate::raw::dir::Attribute;
+use crate::dir::entry::Attribute;
 
 #[derive(Debug, PartialEq)]
 pub enum FatDeviceError {
@@ -23,8 +23,11 @@ pub enum FatError {
     #[error("{0:?}")]
     FailedDeviceAccess(FatDeviceError),
 
-    #[error("Failed dir entry type")]
+    #[error("Failed dir dir type")]
     InvalidDirEntryType,
+
+    #[error("Expected buffer size is {0} but was {1}")]
+    BufferToSmall(usize, usize),
 }
 
 

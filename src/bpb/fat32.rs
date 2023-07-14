@@ -43,7 +43,7 @@ impl<D> Fat32BootSectorReadable for Fat32BootSector<D>
 
 #[cfg(test)]
 mod tests {
-    use crate::raw::bpb::fat32::{Fat32BootSector, Fat32BootSectorReadable};
+    use crate::bpb::fat32::{Fat32BootSector, Fat32BootSectorReadable};
     use crate::test::file_device;
 
     #[test]
