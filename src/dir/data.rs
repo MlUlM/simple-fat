@@ -37,7 +37,13 @@ impl<D> DataEntries<D>
 
         match data {
             Data::RegularFile(_) => { self.find(file_name) }
-            Data::Dir(dir) => { dir.into_data_entries().find(file_name) }
+            Data::Dir(dir) => {
+                if let Some(data) = dir.into_data_entries().find(file_name) {
+                    Some(data)
+                }else{
+                    self.find(file_name)
+                }
+            }
         }
     }
 }
