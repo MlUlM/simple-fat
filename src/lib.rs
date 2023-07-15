@@ -4,6 +4,7 @@
 extern crate alloc;
 
 use alloc::string::ToString;
+use core::fmt::{Debug, Formatter};
 
 pub use device::FatDeviceAccessible;
 
@@ -45,6 +46,12 @@ impl<D> Fat<D> where D: FatDeviceAccessible + Clone {
     }
 }
 
+
+impl<D> Debug for Fat<D> where D: Debug {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{:?}", &self.device)
+    }
+}
 
 #[cfg(test)]
 pub mod test {
