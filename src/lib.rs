@@ -9,7 +9,7 @@ use core::fmt::{Debug, Formatter};
 pub use device::FatDeviceAccessible;
 
 use crate::bpb::BpbFat32;
-use crate::dir::data::Data;
+use crate::dir::data::{Data, DataEntries};
 use crate::dir::data::file::RegularFile;
 use crate::error::{FatError, FatResult};
 
@@ -29,6 +29,12 @@ impl<D> Fat<D> where D: FatDeviceAccessible + Clone {
         Self {
             device
         }
+    }
+
+
+    pub fn root_dir(&self) -> FatResult<DataEntries<BpbFat32<D>>> {
+         BpbFat32::new(self.device.clone())
+            .root_dir()
     }
 
 

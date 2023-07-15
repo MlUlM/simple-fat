@@ -28,6 +28,7 @@ impl<D> DataEntries<D>
     pub fn find(&mut self, file_name: &str) -> Option<Data<D>> {
         let data = self.next()?;
         let name = data.name().ok();
+
         if name
             .map(|name| name.to_str().map(|name| name == file_name).unwrap_or(false))
             .unwrap_or(false)
